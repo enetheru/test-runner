@@ -80,27 +80,44 @@ func _run_test() -> RetCode:
 
 # Calling as an editor script
 func _run() -> void:
+	# NOTE: Maintain a reference to ourself, because no-one else will.
+	# Without this, we will be cleaned up before we have had time to do any
+	# asynchronous work.
+	cycleref = self
+
 	logp("_run() as editorscript - Started")
 	assert( OS.get_thread_caller_id() == OS.get_main_thread_id(),
 		"A _run() must not be called in a threaded context.\n" + \
 		"TestBase relies on the 'await' keyword and functionality which is." + \
 		"not usable in a threaded context.\n")
 
+	# NOTE: We run asynchronously so that a crash doesnt prevent reporting
+	# the retults
+	run_test.call_deferred()
+	await test_finished
+
+	cycleref = null
+
+
+#         ███    ███ ███████ ████████ ██   ██  ██████  ██████  ███████         #
+#         ████  ████ ██         ██    ██   ██ ██    ██ ██   ██ ██              #
+#         ██ ████ ██ █████      ██    ███████ ██    ██ ██   ██ ███████         #
+#         ██  ██  ██ ██         ██    ██   ██ ██    ██ ██   ██      ██         #
+#         ██      ██ ███████    ██    ██   ██  ██████  ██████  ███████         #
+func                        _________METHODS_________              ()->void:pass
+
+func run_test() -> void:
 	# Format Dictionary
 	var fd : Dictionary
 	scene_tree = EditorInterface.get_base_control().get_tree()
 
 	# An opportunity for derived scripts to set the maximum run time and other
 	# variables.
-	if _setup() != OK:
+	@warning_ignore('redundant_await')
+	if await _setup() != OK:
 		fd = {'color':'tomato', 'msg':'_setup() - FAILED'}
 		logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
 		return
-
-	# NOTE: Maintain a reference to ourself, because no-one else will.
-	# Without this, we will be cleaned up before we have had time to do any
-	# asynchronous work.
-	cycleref = self
 
 	# In case of failure of some unforseen way, I want to make sure the name
 	# of our timer node is unique
@@ -121,12 +138,11 @@ func _run() -> void:
 
 	# Start the timer, and call the test function and await its finish.
 	timer.start(max_runtime_s)
-	# NOTE: We run asynchronously so that a crash doesnt prevent reporting
-	# the retults
-	run_test.call_deferred()
-	await test_finished
 
-	# printing output.
+	@warning_ignore('redundant_await')
+	runcode = await _run_test()
+
+		# printing output.
 	if runcode == RetCode.TEST_OK:
 		fd = {'color':'yellowgreen', 'msg':'OK'}
 	else:
@@ -137,23 +153,11 @@ func _run() -> void:
 		output.reduce(Shared.reducer_to_lines)
 
 	# Cleanup after ourselves.
-	if _cleanup() != OK:
+	@warning_ignore('redundant_await')
+	if await _cleanup() != OK:
 		fd = {'color':'tomato', 'msg':'_cleanup() - FAILED'}
 		logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
 	timer.queue_free()
-	cycleref = null
-
-
-#         ███    ███ ███████ ████████ ██   ██  ██████  ██████  ███████         #
-#         ████  ████ ██         ██    ██   ██ ██    ██ ██   ██ ██              #
-#         ██ ████ ██ █████      ██    ███████ ██    ██ ██   ██ ███████         #
-#         ██  ██  ██ ██         ██    ██   ██ ██    ██ ██   ██      ██         #
-#         ██      ██ ███████    ██    ██   ██  ██████  ██████  ███████         #
-func                        _________METHODS_________              ()->void:pass
-
-func run_test() -> void:
-	@warning_ignore('redundant_await')
-	runcode = await _run_test()
 	test_finished.emit()
 
 func logd( msg : Variant = "" ) -> void:

@@ -315,7 +315,10 @@ func process_test( file_item : TreeItem ) -> void:
 		if instance : await run_test_base( instance, result )
 	else:
 		var instance : PlayBase  = script.new()
-		if instance : await run_play_base( instance, result,  )
+		if instance :
+			get_tree().root.add_child(instance, true)
+			await run_play_base( instance, result,  )
+		instance.queue_free()
 
 	#Erase our alternate script file after we are done.
 	if not Engine.is_editor_hint():

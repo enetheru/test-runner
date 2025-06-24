@@ -53,6 +53,10 @@ func                        _________SIGNALS_________              ()->void:pass
 
 signal test_finished
 
+func _on_timer_timeout() -> void:
+	runcode = RetCode.TEST_FAILED
+	logp("[color=salmon]Error: Timeout was reached.[/color]")
+	test_finished.emit()
 
 #      ██████  ██    ██ ███████ ██████  ██████  ██ ██████  ███████ ███████     #
 #     ██    ██ ██    ██ ██      ██   ██ ██   ██ ██ ██   ██ ██      ██          #
@@ -60,6 +64,13 @@ signal test_finished
 #     ██    ██  ██  ██  ██      ██   ██ ██   ██ ██ ██   ██ ██           ██     #
 #      ██████    ████   ███████ ██   ██ ██   ██ ██ ██████  ███████ ███████     #
 func                        ________OVERRIDES________              ()->void:pass
+
+# Override this function to perform setup prior to testing.
+func _setup() -> Error:
+	return OK
+
+func _cleanup() -> Error:
+	return OK
 
 # This is the function to override in derived test functions.
 func _run_test() -> RetCode:
@@ -71,49 +82,22 @@ func _run_test() -> RetCode:
 
 # Calling as an editor script
 func _run() -> void:
+	# NOTE: Maintain a reference to ourself, because no-one else will.
+	# Without this, we will be cleaned up before we have had time to do any
+	# asynchronous work.
+	cycleref = self
+
 	logp("_run() as editorscript - Started")
 	assert( OS.get_thread_caller_id() == OS.get_main_thread_id(),
 		"A _run() must not be called in a threaded context.\n" + \
 		"TestBase relies on the 'await' keyword and functionality which is." + \
 		"not usable in a threaded context.\n")
 
-	# NOTE: Maintain a reference to ourself, because no-one else will.
-	# Without this, we will be cleaned up before we have had time to do any
-	# asynchronous work.
-	cycleref = self
-
-	# In case of failure of some unforseen way, I want to make sure the name
-	# of our timer node is unique
-	var script : Script = get_script()
-	var test_name : String = script.resource_path.validate_node_name()
-
-	# Find, or create our timer.
-	scene_tree = get_tree()
-	var timer : Timer = scene_tree.root.find_child(test_name, false)
-	if timer:
-		logd( "Error: Timer was not removed in last run.")
-		timer.queue_free()
-
-	timer = Timer.new()
-	timer.name = test_name
-	scene_tree.root.add_child(timer)
-	@warning_ignore('return_value_discarded')
-	timer.timeout.connect( test_finished.emit )
-
-	# Start the timer, and call the test function and await its finish.
-	timer.start(max_runtime_s)
 	# NOTE: We run asynchronously so that a crash doesnt prevent reporting
 	# the retults
 	run_test.call_deferred()
 	await test_finished
 
-	# printing output.
-	logp("_run() - %s" % ("OK" if runcode == RetCode.TEST_OK else "FAILED"))
-	if _verbose or _debug:
-		output.reduce(Shared.reducer_to_lines)
-
-	# Cleanup after ourselves.
-	timer.queue_free()
 	cycleref = null
 
 
@@ -125,8 +109,57 @@ func _run() -> void:
 func                        _________METHODS_________              ()->void:pass
 
 func run_test() -> void:
+	# Format Dictionary
+	var fd : Dictionary
+	scene_tree = get_tree()
+
+	# An opportunity for derived scripts to set the maximum run time and other
+	# variables.
+	@warning_ignore('redundant_await')
+	if await _setup() != OK:
+		fd = {'color':'tomato', 'msg':'_setup() - FAILED'}
+		logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
+		return
+
+	# In case of failure of some unforseen way, I want to make sure the name
+	# of our timer node is unique
+	var script : Script = get_script()
+	var test_name : String = script.resource_path.validate_node_name()
+
+	# Find, or create our timer.
+	var timer : Timer = scene_tree.root.find_child(test_name, false)
+	if timer:
+		logd( "Error: Timer was not removed in last run.")
+		timer.queue_free()
+
+	timer = Timer.new()
+	timer.name = test_name
+	scene_tree.root.add_child(timer)
+	@warning_ignore('return_value_discarded')
+	timer.timeout.connect( _on_timer_timeout )
+
+	# Start the timer, and call the test function and await its finish.
+	timer.start(max_runtime_s)
+
 	@warning_ignore('redundant_await')
 	runcode = await _run_test()
+
+		# printing output.
+	if runcode == RetCode.TEST_OK:
+		fd = {'color':'yellowgreen', 'msg':'OK'}
+	else:
+		fd = {'color':'tomato', 'msg':'FAILED'}
+
+	logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
+	if _verbose or _debug:
+		output.reduce(Shared.reducer_to_lines)
+
+	# Cleanup after ourselves.
+	@warning_ignore('redundant_await')
+	if await _cleanup() != OK:
+		fd = {'color':'tomato', 'msg':'_cleanup() - FAILED'}
+		logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
+	timer.queue_free()
 	test_finished.emit()
 
 func logd( msg : Variant = "" ) -> void:
@@ -176,7 +209,7 @@ func sbytes( bytes : PackedByteArray, cols : int = 8 ) -> String:
 #                     ██    ███████ ███████    ██    ███████                   #
 func                        __________TESTS__________              ()->void:pass
 
-func TEST_EQ( want_v : Variant, got_v : Variant, desc : String = "" ) -> int:
+func TEST_EQ( want_v : Variant, got_v : Variant, desc : String = "" ) -> RetCode:
 	if want_v == got_v:
 		logd("TEST_EQ('%s' == '%s'): %s" % [want_v, got_v, desc])
 		return RetCode.TEST_OK
@@ -185,7 +218,7 @@ func TEST_EQ( want_v : Variant, got_v : Variant, desc : String = "" ) -> int:
 	if _verbose: print_rich( msg )
 	return RetCode.TEST_FAILED
 
-func TEST_APPROX( want_v : float, got_v : float, desc : String = "" ) -> int:
+func TEST_APPROX( want_v : float, got_v : float, desc : String = "" ) -> RetCode:
 	if is_equal_approx(want_v, got_v):
 		logd("TEST_APPROX('%s' ~= '%s'): %s" % [want_v, got_v, desc])
 		return RetCode.TEST_OK
@@ -195,7 +228,7 @@ func TEST_APPROX( want_v : float, got_v : float, desc : String = "" ) -> int:
 	return RetCode.TEST_FAILED
 
 
-func TEST_TRUE( value : Variant, desc : String = "" ) -> int:
+func TEST_TRUE( value : Variant, desc : String = "" ) -> RetCode:
 	if value:
 		logd("TEST_TRUE('%s'): %s" % [value, desc])
 		return RetCode.TEST_OK
@@ -204,7 +237,7 @@ func TEST_TRUE( value : Variant, desc : String = "" ) -> int:
 	if _verbose: print_rich( msg )
 	return RetCode.TEST_FAILED
 
-func TEST_OP( val1 : Variant, op : int, val2 : Variant, desc : String = ""  ) -> int:
+func TEST_OP( val1 : Variant, op : int, val2 : Variant, desc : String = ""  ) -> RetCode:
 	var op_s : String
 	var op_result : bool = false
 	match op:
@@ -220,3 +253,4 @@ func TEST_OP( val1 : Variant, op : int, val2 : Variant, desc : String = ""  ) ->
 	output.append.call( msg )
 	if _verbose: print_rich( msg )
 	return RetCode.TEST_FAILED
+
