@@ -1,7 +1,7 @@
 @tool
 extends TestBase
 
-# This test should fail.
+# This test should Succeed
 func _run_test() -> int:
 	runcode &= TEST_TRUE( true )
 

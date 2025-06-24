@@ -11,7 +11,7 @@ data = {
 "width": 16
 }
 
-[sub_resource type="ImageTexture" id="ImageTexture_lplx1"]
+[sub_resource type="ImageTexture" id="ImageTexture_mcoc2"]
 image = SubResource("Image_ws4ry")
 
 [node name="TestRunner" type="VBoxContainer"]
@@ -32,7 +32,7 @@ size_flags_horizontal = 3
 layout_mode = 2
 text = "Reload Tests
 "
-icon = SubResource("ImageTexture_lplx1")
+icon = SubResource("ImageTexture_mcoc2")
 
 [node name="Test" type="Button" parent="Buttons"]
 layout_mode = 2
