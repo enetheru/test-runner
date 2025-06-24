@@ -51,6 +51,10 @@ func                        _________SIGNALS_________              ()->void:pass
 
 signal test_finished
 
+func _on_timer_timeout() -> void:
+	runcode = RetCode.TEST_FAILED
+	logp("[color=salmon]Error: Timeout was reached.[/color]")
+	test_finished.emit()
 
 #      ██████  ██    ██ ███████ ██████  ██████  ██ ██████  ███████ ███████     #
 #     ██    ██ ██    ██ ██      ██   ██ ██   ██ ██ ██   ██ ██      ██          #
@@ -58,6 +62,13 @@ signal test_finished
 #     ██    ██  ██  ██  ██      ██   ██ ██   ██ ██ ██   ██ ██           ██     #
 #      ██████    ████   ███████ ██   ██ ██   ██ ██ ██████  ███████ ███████     #
 func                        ________OVERRIDES________              ()->void:pass
+
+# Override this function to perform setup prior to testing.
+func _setup() -> Error:
+	return OK
+
+func _cleanup() -> Error:
+	return OK
 
 # This is the function to override in derived test functions.
 func _run_test() -> RetCode:
@@ -75,6 +86,17 @@ func _run() -> void:
 		"TestBase relies on the 'await' keyword and functionality which is." + \
 		"not usable in a threaded context.\n")
 
+	# Format Dictionary
+	var fd : Dictionary
+	scene_tree = EditorInterface.get_base_control().get_tree()
+
+	# An opportunity for derived scripts to set the maximum run time and other
+	# variables.
+	if _setup() != OK:
+		fd = {'color':'tomato', 'msg':'_setup() - FAILED'}
+		logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
+		return
+
 	# NOTE: Maintain a reference to ourself, because no-one else will.
 	# Without this, we will be cleaned up before we have had time to do any
 	# asynchronous work.
@@ -86,7 +108,6 @@ func _run() -> void:
 	var test_name : String = script.resource_path.validate_node_name()
 
 	# Find, or create our timer.
-	scene_tree = EditorInterface.get_base_control().get_tree()
 	var timer : Timer = scene_tree.root.find_child(test_name, false)
 	if timer:
 		logd( "Error: Timer was not removed in last run.")
@@ -96,7 +117,7 @@ func _run() -> void:
 	timer.name = test_name
 	scene_tree.root.add_child(timer)
 	@warning_ignore('return_value_discarded')
-	timer.timeout.connect( test_finished.emit )
+	timer.timeout.connect( _on_timer_timeout )
 
 	# Start the timer, and call the test function and await its finish.
 	timer.start(max_runtime_s)
@@ -106,7 +127,6 @@ func _run() -> void:
 	await test_finished
 
 	# printing output.
-	var fd : Dictionary
 	if runcode == RetCode.TEST_OK:
 		fd = {'color':'yellowgreen', 'msg':'OK'}
 	else:
@@ -117,6 +137,9 @@ func _run() -> void:
 		output.reduce(Shared.reducer_to_lines)
 
 	# Cleanup after ourselves.
+	if _cleanup() != OK:
+		fd = {'color':'tomato', 'msg':'_cleanup() - FAILED'}
+		logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
 	timer.queue_free()
 	cycleref = null
 

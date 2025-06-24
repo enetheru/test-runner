@@ -328,19 +328,14 @@ func process_test( file_item : TreeItem ) -> void:
 	if not result.output.is_empty():
 		info_text = result.output.reduce(Shared.reducer_to_lines)
 
-	print("Result: ", result)
-
 	# Update the tree_item
 	if result.retcode == RetCode.TEST_FAILED:
-		print("infobox set_fail")
 		set_item_fail(file_item)
 		info_box.set_fail(info_text)
 	elif 'warn' in info_text.to_lower():
-		print("infobox set_warn")
 		set_item_warning(file_item)
 		info_box.set_warning(info_text)
 	else:
-		print("infobox set_success")
 		set_item_success(file_item)
 		info_box.set_success(info_text)
 	update_stats()
