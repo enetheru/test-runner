@@ -1,7 +1,7 @@
 @tool
 extends PanelContainer
 
-@onready var stylebox : StyleBox = preload('res/info_style_box.tres').duplicate()
+@onready var stylebox : StyleBoxFlat = preload('res/info_style_box.tres').duplicate()
 const ICON = preload('res/icon.png')
 
 var error_icon: Texture2D = ICON
@@ -20,8 +20,10 @@ func _ready() -> void:
 	focus_mode = Control.FOCUS_CLICK
 	add_theme_stylebox_override("panel", stylebox)
 
-	focus_entered.connect(func(): stylebox.bg_color = Color(0.275, 0.439, 0.584) )
-	focus_exited.connect(func(): stylebox.bg_color = Color(0.216, 0.31, 0.4) )
+	@warning_ignore_start('return_value_discarded')
+	focus_entered.connect(func() -> void: stylebox.bg_color = Color(0.275, 0.439, 0.584) )
+	focus_exited.connect(func() -> void: stylebox.bg_color = Color(0.216, 0.31, 0.4) )
+	@warning_ignore_restore('return_value_discarded')
 
 	label.add_theme_stylebox_override("normal", stylebox)
 
@@ -32,12 +34,12 @@ func _ready_editor() -> void:
 	warning_icon = etheme.get_icon( "StatusWarning", "EditorIcons" )
 
 
-func set_title( new_title : String ):
+func set_title( new_title : String ) -> void:
 	title = new_title
 	label.clear()
 	label.append_text(new_title)
 
-func set_success( _txt : String ):
+func set_success( _txt : String ) -> void:
 	stylebox.border_color = Color.DARK_GREEN
 	label.clear()
 	label.add_image(success_icon)
@@ -45,7 +47,7 @@ func set_success( _txt : String ):
 	rtl.clear()
 	rtl.hide()
 
-func set_warning( txt : String ):
+func set_warning( txt : String ) -> void:
 	stylebox.border_color = Color.DARK_KHAKI
 	label.clear()
 	label.add_image(warning_icon)
@@ -53,7 +55,7 @@ func set_warning( txt : String ):
 	rtl.clear()
 	rtl.append_text(txt)
 
-func set_fail( txt : String ):
+func set_fail( txt : String ) -> void:
 	stylebox.border_color = Color.DARK_RED
 	label.clear()
 	label.add_image(error_icon)

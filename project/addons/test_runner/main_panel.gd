@@ -285,6 +285,12 @@ func process_test( file_item : TreeItem ) -> void:
 	var script_file : String = file_item.get_text(0)
 	var script_path : String = "/".join([test_def.folder_path, script_file])
 
+	# We're only keeping around one rest result per test.
+	var result : TestResult = test_def.results.get_or_add( file_item, TestResult.new() )
+	result.latest = info_box
+	result.retcode = RetCode.TEST_FAILED
+	result.output = ["Only Just Created"]
+
 	# Tests can be run three ways.
 	# 	1. Headless as EditorScript
 	# 	2. From the test runner as EditorScript
@@ -292,12 +298,13 @@ func process_test( file_item : TreeItem ) -> void:
 	# If the last, the script header needs to be re-written to extend Node
 	if not Engine.is_editor_hint():
 		script_path = re_write(script_path)
-
-	# We're only keeping around one rest result per test.
-	var result : TestResult = test_def.results.get_or_add( file_item, TestResult.new() )
-	result.latest = info_box
-	result.retcode = RetCode.TEST_FAILED
-	result.output = ["Instantiation failed."]
+		# If Script path fails
+		if script_path.is_empty():
+			result.retcode = RetCode.TEST_FAILED
+			result.output = ["Re-Writing the script for in-game testing failed."]
+			set_item_fail(file_item)
+			info_box.set_fail("Re-Writing the script for in-game testing failed.")
+			return
 
 	# Load up the script and run the test
 	var script : GDScript = load( script_path )

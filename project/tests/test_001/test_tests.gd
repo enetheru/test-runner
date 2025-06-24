@@ -2,7 +2,7 @@
 extends TestBase
 
 # This test should Succeed
-func _run_test() -> int:
+func _run_test() -> RetCode:
 	runcode &= TEST_TRUE( true )
 
 	runcode &= TEST_EQ( 1, 1, "Testing EQUAL")

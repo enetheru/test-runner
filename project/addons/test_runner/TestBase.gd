@@ -106,7 +106,13 @@ func _run() -> void:
 	await test_finished
 
 	# printing output.
-	logp("_run() - %s" % ("OK" if runcode == RetCode.TEST_OK else "FAILED"))
+	var fd : Dictionary
+	if runcode == RetCode.TEST_OK:
+		fd = {'color':'yellowgreen', 'msg':'OK'}
+	else:
+		fd = {'color':'tomato', 'msg':'FAILED'}
+
+	logp("[color={color}][b]_run() - {msg}[/b][/color]".format(fd) )
 	if _verbose or _debug:
 		output.reduce(Shared.reducer_to_lines)
 
@@ -174,7 +180,7 @@ func sbytes( bytes : PackedByteArray, cols : int = 8 ) -> String:
 #                     ██    ███████ ███████    ██    ███████                   #
 func                        __________TESTS__________              ()->void:pass
 
-func TEST_EQ( want_v : Variant, got_v : Variant, desc : String = "" ) -> int:
+func TEST_EQ( want_v : Variant, got_v : Variant, desc : String = "" ) -> RetCode:
 	if want_v == got_v:
 		logd("TEST_EQ('%s' == '%s'): %s" % [want_v, got_v, desc])
 		return RetCode.TEST_OK
@@ -183,7 +189,7 @@ func TEST_EQ( want_v : Variant, got_v : Variant, desc : String = "" ) -> int:
 	if _verbose: print_rich( msg )
 	return RetCode.TEST_FAILED
 
-func TEST_APPROX( want_v : float, got_v : float, desc : String = "" ) -> int:
+func TEST_APPROX( want_v : float, got_v : float, desc : String = "" ) -> RetCode:
 	if is_equal_approx(want_v, got_v):
 		logd("TEST_APPROX('%s' ~= '%s'): %s" % [want_v, got_v, desc])
 		return RetCode.TEST_OK
@@ -193,7 +199,7 @@ func TEST_APPROX( want_v : float, got_v : float, desc : String = "" ) -> int:
 	return RetCode.TEST_FAILED
 
 
-func TEST_TRUE( value : Variant, desc : String = "" ) -> int:
+func TEST_TRUE( value : Variant, desc : String = "" ) -> RetCode:
 	if value:
 		logd("TEST_TRUE('%s'): %s" % [value, desc])
 		return RetCode.TEST_OK
@@ -202,7 +208,7 @@ func TEST_TRUE( value : Variant, desc : String = "" ) -> int:
 	if _verbose: print_rich( msg )
 	return RetCode.TEST_FAILED
 
-func TEST_OP( val1 : Variant, op : int, val2 : Variant, desc : String = ""  ) -> int:
+func TEST_OP( val1 : Variant, op : int, val2 : Variant, desc : String = ""  ) -> RetCode:
 	var op_s : String
 	var op_result : bool = false
 	match op:
