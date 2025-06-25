@@ -2,11 +2,10 @@
 extends EditorPlugin
 
 const MainPanel = preload('main_panel.tscn')
-const FB_ICON = preload('res/icon.png')
+const RUN_ALL = preload('res://addons/test_runner/res/run-all.svg')
+var main_panel_instance : Control
 
-var main_panel_instance
-
-func _enter_tree():
+func _enter_tree() -> void:
 	main_panel_instance = MainPanel.instantiate()
 	# Add the main panel to the editor's main viewport.
 	EditorInterface.get_editor_main_screen().add_child(main_panel_instance)
@@ -14,23 +13,23 @@ func _enter_tree():
 	_make_visible(false)
 
 
-func _exit_tree():
+func _exit_tree() -> void:
 	if main_panel_instance:
 		main_panel_instance.queue_free()
 
 
-func _has_main_screen():
+func _has_main_screen() -> bool:
 	return true
 
 
-func _make_visible(visible):
+func _make_visible(visible : bool) -> void:
 	if main_panel_instance:
 		main_panel_instance.visible = visible
 
 
-func _get_plugin_name():
+func _get_plugin_name() -> String:
 	return "TestRunner"
 
 
-func _get_plugin_icon():
-	return FB_ICON
+func _get_plugin_icon() -> Texture2D:
+	return RUN_ALL

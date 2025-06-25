@@ -24,7 +24,12 @@ const RetCode = Shared.RetCode
 const INFO_BOX = preload('info_box.tscn')
 
 # Resources
-const ICON = preload('res/icon.png')
+const SKULL = preload('res://addons/test_runner/res/skull.svg')
+
+const FLIP_TAILS = preload('res://addons/test_runner/res/flip_tails.svg')
+const FLIP_HEAD = preload('res://addons/test_runner/res/flip_head.svg')
+const FLIP_HALF = preload('res://addons/test_runner/res/flip_half.svg')
+const MEDAL = preload('res://addons/test_runner/res/medal.tres')
 
 # ██████  ██████   ██████  ██████  ███████ ██████  ████████ ██ ███████ ███████ #
 # ██   ██ ██   ██ ██    ██ ██   ██ ██      ██   ██    ██    ██ ██      ██      #
@@ -34,40 +39,38 @@ const ICON = preload('res/icon.png')
 func                        ________PROPERTIES_______              ()->void:pass
 
 # Icons
-@export var schema_icon: Texture2D
+const DEBUG_RERUN = preload('res://addons/test_runner/res/debug-rerun.svg')
+const FILE_CODE = preload('res://addons/test_runner/res/file-code.svg')
+const FOLDER_OPEN = preload('res://addons/test_runner/res/folder-open.svg')
 
-var folder_icon: Texture2D = ICON
-var reload_icon: Texture2D = ICON
-var trash_icon: Texture2D = ICON
-var script_icon: Texture2D = ICON
-var error_icon: Texture2D = ICON
-var success_icon: Texture2D = ICON
-var warning_icon: Texture2D = ICON
+# Top Row Left
+@onready var run_btn: Button = $Buttons/Left/Run
+@onready var reload_btn: Button = $Buttons/Left/Reload
+@onready var filters_btn: Button = $Buttons/Left/Filters
+@onready var folder_btn: Button = $Buttons/Left/Folder
 
-@onready var buttons : Dictionary[StringName, Button] = {
-	&"Reload": $Buttons/Reload,
-	&"Test" : $Buttons/Test,
-	&"ClearResults": $Buttons/ClearResults,
-	&"Help":$Buttons/Help
-	# TODO add debug and verbose checkboxes.
-	# TODO add a button to select which path to use for tests
-	# TODO add a button to select folder and file filters from a script.
-}
+# Top Row Center
+@onready var stats_counter: RichTextLabel = $Buttons/Center/StatsCounter
+# Top Row Right
+@onready var verbose_btn: CheckButton = $Buttons/Right/Verbose
+@onready var debug_btn: CheckButton = $Buttons/Right/Debug
+@onready var clear_btn: Button = $Buttons/Right/ClearResults
+@onready var help_btn: Button = $Buttons/Right/Help
+
+# Help Popup
 @onready var help_popup: PopupPanel = $PopupPanel
 
-@onready var stats_counter: RichTextLabel = $Buttons/StatsCounter
-
 # tree control
-@onready var tree: Tree = $TestOutput/Tree
+@onready var tests_tree: Tree = $TestOutput/TestsTree
 @onready var info_list: VBoxContainer = $TestOutput/InfoList
 @onready var info_scroller: ScrollContainer = $TestOutput/InfoList/ScrollContainer
 @onready var info_items: VBoxContainer = $TestOutput/InfoList/ScrollContainer/InfoItems
 
-@onready var rtl: RichTextLabel = $RichTextLabel
-
 # Runtime
 var test_list : Array[TestDef]
 var test_selection : Dictionary = {}
+var test_verbose : bool = false
+var test_debug : bool = false
 
 # Configuration
 var test_path : String = 'res://tests'
@@ -82,37 +85,57 @@ var test_folder_filter : Callable = default_folder_filter
 #             ███████   ████   ███████ ██   ████    ██    ███████              #
 func                        __________EVENTS_________              ()->void:pass
 
-func _on_reload_pressed() -> void:
-	tree.clear()
-	regenerate_tree()
-
-func _on_test_pressed() -> void:
+func _on_run_pressed() -> void:
 	process_selection()
 
-func _on_clear_pressed() -> void:
+func _on_reload_pressed() -> void:
+	tests_tree.clear()
+	regenerate_tree()
+
+func _on_filters_pressed() -> void:
+	pass # Replace with function body.
+
+
+func _on_folder_pressed() -> void:
+	pass # Replace with function body.
+
+
+func _on_verbose_toggled(toggled_on: bool) -> void:
+	test_verbose = toggled_on
+
+
+func _on_debug_toggled(toggled_on: bool) -> void:
+	test_debug = toggled_on
+
+
+func _on_clear_results_pressed() -> void:
 	for child in info_items.get_children():
 		child.call_deferred("queue_free")
 
-func _on_multi_select( item : TreeItem, _column : int, is_selected : bool) -> void:
-	if is_selected: test_selection[item] = true
+func _on_tests_tree_multi_selected(
+			item: TreeItem,
+			_column: int,
+			selected: bool
+			) -> void:
+	if selected: test_selection[item] = true
 	else:
 		@warning_ignore('return_value_discarded')
 		test_selection.erase(item)
 
-func _on_item_button_clicked(
-			file_item: TreeItem,
+func _on_tests_tree_button_clicked(
+			item: TreeItem,
 			_column: int,
 			_id: int,
 			_mouse_button_index: int
 			) -> void:
-	process_test(file_item)
+	process_test(item)
 
-func _on_gui_input( event : InputEvent ) -> void:
+func _on_tests_tree_gui_input(event: InputEvent) -> void:
 	if not event is InputEventMouseButton: return
 	var mb_event : InputEventMouseButton = event
 	if not mb_event.pressed: return
 	#var column = tree.get_column_at_position(mb_event.position)
-	var tree_item : TreeItem = tree.get_item_at_position(mb_event.position)
+	var tree_item : TreeItem = tests_tree.get_item_at_position(mb_event.position)
 	if not tree_item: return
 
 	var metadata : Variant = tree_item.get_metadata(0)
@@ -138,48 +161,7 @@ func _on_gui_input( event : InputEvent ) -> void:
 func                        ________OVERRIDES________              ()->void:pass
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		_ready_editor()
-
-	# Icon helper snippet
-	#for type_name in etheme.get_type_list():
-		#for icon_name in etheme.get_icon_list(type_name):
-			#rtl.add_image(etheme.get_icon(icon_name, type_name))
-			#rtl.append_text("\t")
-			#rtl.append_text("/".join([type_name,icon_name]))
-			#rtl.newline()
-
-	@warning_ignore_start('return_value_discarded')
-	buttons[&"Reload"].pressed.connect( _on_reload_pressed )
-	buttons[&"Reload"].icon = reload_icon
-	buttons[&"Test"].pressed.connect( _on_test_pressed )
-	buttons[&"ClearResults"].pressed.connect( _on_clear_pressed )
-	buttons[&"Help"].pressed.connect( help_popup.popup )
-
-	# TODO add a popup with information about recursive expansion
-	# and contracting using the shift key.
-	#info.pressed.connect( info_popup )
-
-	tree.multi_selected.connect(_on_multi_select)
-	tree.button_clicked.connect(_on_item_button_clicked)
-	tree.gui_input.connect(_on_gui_input)
-	@warning_ignore_restore('return_value_discarded')
-
 	_on_reload_pressed()
-
-func _ready_editor() -> void:
-	var etheme : Theme = EditorInterface.get_editor_theme()
-	folder_icon = etheme.get_icon( "Folder", "EditorIcons" )
-	reload_icon = etheme.get_icon( "Reload", "EditorIcons" )
-	trash_icon = etheme.get_icon( "Remove", "EditorIcons" )
-	script_icon = etheme.get_icon( "GDScript", "EditorIcons" )
-	error_icon = etheme.get_icon( "StatusError", "EditorIcons" )
-	success_icon = etheme.get_icon( "StatusSuccess", "EditorIcons" )
-	warning_icon = etheme.get_icon( "StatusWarning", "EditorIcons" )
-
-func _ready_play() -> void:
-	# TODO replace the editor icons with ones from the addon.
-	pass
 
 
 #         ███    ███ ███████ ████████ ██   ██  ██████  ██████  ███████         #
@@ -238,13 +220,26 @@ func update_stats() -> void:
 			if result.retcode == RetCode.TEST_FAILED: failures += 1
 
 	stats_counter.add_text("%d:" % groups)
-	stats_counter.add_image(folder_icon)
+	stats_counter.add_image(FOLDER_OPEN, 23)
 	stats_counter.add_text(", %d:" % results)
-	stats_counter.add_image(script_icon)
+	stats_counter.add_image(FLIP_HALF, 23)
 	stats_counter.add_text(", %d:" % failures)
-	stats_counter.add_image(error_icon)
+	stats_counter.add_image(FLIP_TAILS, 23, 23, Color.TOMATO)
 	stats_counter.add_text(", %d:" % successes)
-	stats_counter.add_image(success_icon)
+	stats_counter.add_image(FLIP_HEAD, 23, 23, Color.YELLOW_GREEN)
+
+	#add_image(
+	# image: Texture2D,
+	#  width: int = 0,
+	#  height: int = 0,
+	#  color: Color = Color(1, 1, 1, 1),
+	#  inline_align: InlineAlignment = 5,
+	#  region: Rect2 = Rect2(0, 0, 0, 0),
+	#  key: Variant = null,
+	#  pad: bool = false,
+	#  tooltip: String = "",
+	#  size_in_percent: bool = false)
+
 
 	already_updating = false
 
@@ -266,9 +261,9 @@ func create_info( file_item : TreeItem ) -> Control:
 func process_selection() -> void:
 	var selection : Array
 	if test_selection.is_empty():
-		selection = tree.get_root().get_children()
-	elif tree.get_root() in test_selection.keys():
-		selection = tree.get_root().get_children()
+		selection = tests_tree.get_root().get_children()
+	elif tests_tree.get_root() in test_selection.keys():
+		selection = tests_tree.get_root().get_children()
 	else:
 		selection = test_selection.keys()
 
@@ -279,11 +274,11 @@ func process_selection() -> void:
 
 
 func process_test( file_item : TreeItem ) -> void:
-	print_rich("[b]STARTED - process_test( %s )[/b]" % file_item.get_text(0) )
 	var info_box : InfoBox = await create_info( file_item )
 	var test_def : TestDef = file_item.get_metadata(0)
 	var script_file : String = file_item.get_text(0)
 	var script_path : String = "/".join([test_def.folder_path, script_file])
+	var info_text : String
 
 	# We're only keeping around one rest result per test.
 	var result : TestResult = test_def.results.get_or_add( file_item, TestResult.new() )
@@ -302,8 +297,9 @@ func process_test( file_item : TreeItem ) -> void:
 		if script_path.is_empty():
 			result.retcode = RetCode.TEST_FAILED
 			result.output = ["Re-Writing the script for in-game testing failed."]
-			set_item_fail(file_item)
-			info_box.set_fail("Re-Writing the script for in-game testing failed.")
+			info_text = result.output.reduce(Shared.reducer_to_lines)
+			set_tree_item_failed(file_item)
+			info_box.set_content( Color.DARK_RED, FLIP_TAILS, info_text)
 			return
 
 	# Load up the script and run the test
@@ -324,28 +320,30 @@ func process_test( file_item : TreeItem ) -> void:
 	if not Engine.is_editor_hint():
 		var err : Error = DirAccess.remove_absolute(script_path)
 		if err != OK:
-			printerr( error_string(err), " Failure to remove alternate script")
+			var msg : String = error_string(err) + ": Failure to remove alternate script"
+			result.output.append(msg)
+			printerr( msg )
 
-
-	var info_text : String = "Empty"
-	if not result.output.is_empty():
-		info_text = result.output.reduce(Shared.reducer_to_lines)
+	if (test_verbose or test_debug or result.retcode == RetCode.TEST_FAILED):
+		info_text = "Empty" if result.output.is_empty() \
+			else result.output.reduce(Shared.reducer_to_lines)
 
 	# Update the tree_item
 	if result.retcode == RetCode.TEST_FAILED:
-		set_item_fail(file_item)
-		info_box.set_fail(info_text)
+		set_tree_item_failed(file_item)
+		info_box.set_content( Color.DARK_RED, FLIP_TAILS, info_text )
 	elif 'warn' in info_text.to_lower():
-		set_item_warning(file_item)
-		info_box.set_warning(info_text)
+		set_tree_item_warning(file_item)
+		info_box.set_content( Color.DARK_GOLDENROD, FLIP_HALF, info_text )
 	else:
-		set_item_success(file_item)
-		info_box.set_success(info_text)
+		set_tree_item_success(file_item)
+		info_box.set_content( Color.SEA_GREEN, FLIP_HEAD, info_text )
 	update_stats()
-	print_rich("[b]COMPLETED - process_test( %s )[/b]" % script_file )
 
 
 func run_test_base( instance : TestBase, result : TestResult ) -> void:
+	instance._verbose = test_verbose
+	instance._debug = test_debug
 	@warning_ignore('redundant_await')
 	await instance.run_test()
 	result.retcode = instance.runcode
@@ -353,6 +351,8 @@ func run_test_base( instance : TestBase, result : TestResult ) -> void:
 
 
 func run_play_base( instance : PlayBase, result : TestResult ) -> void:
+	instance._verbose = test_verbose
+	instance._debug = test_debug
 	@warning_ignore('redundant_await')
 	await instance.run_test()
 	result.retcode = instance.runcode
@@ -405,22 +405,25 @@ extends PlayBase\n"
 #                          ██    ██   ██ ███████ ███████                       #
 func                        __________TREE___________              ()->void:pass
 
-func set_item_fail( item : TreeItem ) -> void:
+func set_tree_item_failed( item : TreeItem ) -> void:
 	item.set_text(1, "FAILURE")
 	item.set_custom_bg_color(0, Color.DARK_RED, false)
 	item.set_custom_bg_color(1, Color.DARK_RED, false)
 
-func set_item_warning( item : TreeItem ) -> void:
+
+func set_tree_item_warning( item : TreeItem ) -> void:
 	item.set_text(1, "!")
 	item.set_custom_bg_color(0, Color.DARK_GOLDENROD, false)
 	item.set_custom_color(0, Color.DARK_SLATE_GRAY)
 	item.set_custom_bg_color(1, Color.DARK_GOLDENROD, false)
 	item.set_custom_color(1, Color.DARK_SLATE_GRAY)
 
-func set_item_success( item : TreeItem ) -> void:
+
+func set_tree_item_success( item : TreeItem ) -> void:
 	item.set_text(1, "OK")
 	item.set_custom_bg_color(0, Color.DARK_GREEN, false)
 	item.set_custom_bg_color(1, Color.DARK_GREEN, false)
+
 
 func add_action_row(
 			test_def : TestDef,
@@ -435,24 +438,24 @@ func add_action_row(
 	item.set_text_alignment(1, HORIZONTAL_ALIGNMENT_CENTER)
 	item.set_selectable(1, false )
 	item.set_text(1, "PENDING")
-	item.add_button(1, reload_icon, -1, false, "[Re]Run Test Action" )
-	item.set_icon(0, script_icon)
+	item.add_button(1, DEBUG_RERUN, -1, false, "[Re]Run Test Action" )
+	item.set_icon(0, FILE_CODE)
 
 
 func regenerate_tree() -> void:
-	tree.clear()
+	tests_tree.clear()
 
 	# re-build the test dictionary
 	test_list = collect_tests( test_path )
 
-	tree.set_column_title(0, "TestElement")
-	tree.set_column_title(1, "  Result  ")
-	tree.set_column_expand(1,false)
-	var _top_item : TreeItem = tree.create_item()
+	tests_tree.set_column_title(0, "TestElement")
+	tests_tree.set_column_title(1, "  Result  ")
+	#tests_tree.set_column_expand( 1, false)
+	var _top_item : TreeItem = tests_tree.create_item()
 	_top_item.set_text(0,"Tests")
 	for test_def : TestDef in test_list:
 		# Add Folder name
-		var folder_item : TreeItem = tree.create_item()
+		var folder_item : TreeItem = tests_tree.create_item()
 		folder_item.set_text( 0, test_def.name )
 		folder_item.set_selectable(1, false )
 

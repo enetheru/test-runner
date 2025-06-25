@@ -1,0 +1,16 @@
+<svg
+  viewBox="0 0 48 48"
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg"
+  xmlns:svg="http://www.w3.org/2000/svg">
+  <path
+    fill="#ffffff"
+    d="M 4.76,2 2.08,3.41 V 44.56 L 4.76,46
+    35.62,25.42 V 22.58 Z M 5.51,41.37 V 6.63 L
+    31.58,24.02 Z"/>
+  <path
+    fill="#ffffff"
+    d="M 15.8,45.49 45.91,25.42 V 22.58 L
+    15.8,2.5 V 6.63 L 41.87,24.02
+    15.8,41.37 Z"/>
+</svg>

@@ -1,18 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://c3qffhwtfrdcw"]
+[gd_scene load_steps=8 format=3 uid="uid://cp6632s1ekh6i"]
 
-[ext_resource type="Script" uid="uid://c6jjbfj3nprap" path="res://addons/test_runner/main_panel.gd" id="1_ws4ry"]
-
-[sub_resource type="Image" id="Image_ws4ry"]
-data = {
-"data": PackedByteArray(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 3, 224, 224, 224, 105, 224, 224, 224, 192, 224, 224, 224, 244, 224, 224, 224, 238, 224, 224, 224, 197, 224, 224, 224, 105, 255, 255, 255, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 233, 233, 233, 23, 225, 225, 225, 207, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 198, 226, 226, 226, 26, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 6, 224, 224, 224, 205, 224, 224, 224, 255, 224, 224, 224, 218, 225, 225, 225, 83, 237, 237, 237, 14, 237, 237, 237, 14, 224, 224, 224, 82, 224, 224, 224, 220, 224, 224, 224, 255, 224, 224, 224, 197, 255, 255, 255, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 225, 225, 225, 102, 224, 224, 224, 255, 224, 224, 224, 218, 227, 227, 227, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 224, 224, 224, 16, 224, 224, 224, 221, 224, 224, 224, 255, 225, 225, 225, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 224, 224, 224, 198, 224, 224, 224, 255, 225, 225, 225, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 226, 226, 226, 86, 224, 224, 224, 255, 224, 224, 224, 194, 0, 0, 0, 0, 0, 0, 0, 0, 255, 255, 255, 1, 255, 255, 255, 4, 224, 224, 224, 238, 224, 224, 224, 255, 227, 227, 227, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 229, 229, 229, 19, 224, 224, 224, 255, 224, 224, 224, 233, 0, 0, 0, 0, 0, 0, 0, 0, 224, 224, 224, 160, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 255, 225, 225, 225, 159, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 230, 230, 230, 20, 224, 224, 224, 255, 224, 224, 224, 237, 0, 0, 0, 0, 0, 0, 0, 0, 230, 230, 230, 10, 224, 224, 224, 213, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 212, 230, 230, 230, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 224, 224, 224, 90, 224, 224, 224, 255, 224, 224, 224, 185, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 225, 225, 225, 42, 224, 224, 224, 245, 224, 224, 224, 245, 225, 225, 225, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 232, 232, 232, 22, 224, 224, 224, 224, 224, 224, 224, 255, 224, 224, 224, 98, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 224, 224, 224, 96, 226, 226, 226, 95, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 230, 230, 230, 20, 224, 224, 224, 88, 224, 224, 224, 221, 224, 224, 224, 255, 225, 225, 225, 199, 255, 255, 255, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 255, 224, 224, 224, 200, 227, 227, 227, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 224, 224, 224, 236, 224, 224, 224, 195, 224, 224, 224, 96, 255, 255, 255, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0),
-"format": "RGBA8",
-"height": 16,
-"mipmaps": false,
-"width": 16
-}
-
-[sub_resource type="ImageTexture" id="ImageTexture_mcoc2"]
-image = SubResource("Image_ws4ry")
+[ext_resource type="Script" uid="uid://c6jjbfj3nprap" path="res://addons/test_runner/main_panel.gd" id="1_alnk0"]
+[ext_resource type="Texture2D" uid="uid://c3w4bod4en2gx" path="res://addons/test_runner/res/run-all.svg" id="2_73jry"]
+[ext_resource type="Texture2D" uid="uid://cjnyuuf58npol" path="res://addons/test_runner/res/folder-cog.svg" id="3_4mcxl"]
+[ext_resource type="Texture2D" uid="uid://ixnh31np28ok" path="res://addons/test_runner/res/filter-cog.svg" id="4_ub16m"]
+[ext_resource type="Texture2D" uid="uid://c5mjw61j4wra4" path="res://addons/test_runner/res/folder-sync.svg" id="5_k3utk"]
+[ext_resource type="Texture2D" uid="uid://clvd7lgq1sdn3" path="res://addons/test_runner/res/trash-can.svg" id="6_blb3b"]
+[ext_resource type="Texture2D" uid="uid://dngr7cckmvug" path="res://addons/test_runner/res/circle-question.svg" id="7_5fedl"]
 
 [node name="TestRunner" type="VBoxContainer"]
 anchors_preset = 15
@@ -22,24 +16,55 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = ExtResource("1_ws4ry")
+script = ExtResource("1_alnk0")
 
-[node name="Buttons" type="HBoxContainer" parent="."]
+[node name="Buttons" type="GridContainer" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
+columns = 3
 
-[node name="Reload" type="Button" parent="Buttons"]
+[node name="Left" type="HBoxContainer" parent="Buttons"]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="Run" type="Button" parent="Buttons/Left"]
+layout_mode = 2
+theme_override_colors/icon_disabled_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_hover_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_pressed_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_focus_color = Color(1, 1, 1, 1)
+theme_override_colors/icon_normal_color = Color(1, 1, 1, 1)
+theme_override_constants/icon_max_width = 24
+text = "Run
+"
+icon = ExtResource("2_73jry")
+
+[node name="Reload" type="Button" parent="Buttons/Left"]
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
 text = "Reload Tests
 "
-icon = SubResource("ImageTexture_mcoc2")
+icon = ExtResource("5_k3utk")
 
-[node name="Test" type="Button" parent="Buttons"]
+[node name="Filters" type="Button" parent="Buttons/Left"]
 layout_mode = 2
-text = "Run Selected
-"
+text = "Filters"
+icon = ExtResource("4_ub16m")
 
-[node name="StatsCounter" type="RichTextLabel" parent="Buttons"]
+[node name="Folder" type="Button" parent="Buttons/Left"]
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+text = "Folder"
+icon = ExtResource("3_4mcxl")
+
+[node name="Center" type="HBoxContainer" parent="Buttons"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 0
+
+[node name="StatsCounter" type="RichTextLabel" parent="Buttons/Center"]
 layout_mode = 2
 size_flags_horizontal = 3
 bbcode_enabled = true
@@ -50,21 +75,38 @@ autowrap_mode = 0
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="ClearResults" type="Button" parent="Buttons"]
+[node name="Right" type="HBoxContainer" parent="Buttons"]
 layout_mode = 2
-text = "ClearResults
-"
+size_flags_horizontal = 3
+size_flags_vertical = 0
+alignment = 2
 
-[node name="Help" type="Button" parent="Buttons"]
+[node name="Verbose" type="CheckButton" parent="Buttons/Right"]
+layout_mode = 2
+text = "Verbose"
+
+[node name="Debug" type="CheckButton" parent="Buttons/Right"]
+layout_mode = 2
+text = "Debug"
+
+[node name="ClearResults" type="Button" parent="Buttons/Right"]
+layout_mode = 2
+theme_override_constants/icon_max_width = 24
+text = "Clear Results
+"
+icon = ExtResource("6_blb3b")
+
+[node name="Help" type="Button" parent="Buttons/Right"]
 layout_mode = 2
 text = "Help"
+icon = ExtResource("7_5fedl")
 
 [node name="TestOutput" type="HSplitContainer" parent="."]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="Tree" type="Tree" parent="TestOutput"]
+[node name="TestsTree" type="Tree" parent="TestOutput"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -97,18 +139,6 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_constants/separation = 8
 
-[node name="RichTextLabel" type="RichTextLabel" parent="."]
-visible = false
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-size_flags_stretch_ratio = 0.31
-focus_mode = 2
-bbcode_enabled = true
-scroll_following = true
-context_menu_enabled = true
-selection_enabled = true
-
 [node name="PopupPanel" type="PopupPanel" parent="."]
 initial_position = 1
 size = Vector2i(520, 264)
@@ -132,3 +162,15 @@ text = "Help Documentation"
 fit_content = true
 scroll_active = false
 autowrap_mode = 0
+
+[connection signal="pressed" from="Buttons/Left/Run" to="." method="_on_run_pressed"]
+[connection signal="pressed" from="Buttons/Left/Reload" to="." method="_on_reload_pressed"]
+[connection signal="pressed" from="Buttons/Left/Filters" to="." method="_on_filters_pressed"]
+[connection signal="pressed" from="Buttons/Left/Folder" to="." method="_on_folder_pressed"]
+[connection signal="toggled" from="Buttons/Right/Verbose" to="." method="_on_verbose_toggled"]
+[connection signal="toggled" from="Buttons/Right/Debug" to="." method="_on_debug_toggled"]
+[connection signal="pressed" from="Buttons/Right/ClearResults" to="." method="_on_clear_results_pressed"]
+[connection signal="pressed" from="Buttons/Right/Help" to="PopupPanel" method="popup"]
+[connection signal="button_clicked" from="TestOutput/TestsTree" to="." method="_on_tests_tree_button_clicked"]
+[connection signal="gui_input" from="TestOutput/TestsTree" to="." method="_on_tests_tree_gui_input"]
+[connection signal="multi_selected" from="TestOutput/TestsTree" to="." method="_on_tests_tree_multi_selected"]

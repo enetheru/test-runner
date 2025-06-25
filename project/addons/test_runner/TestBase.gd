@@ -107,6 +107,11 @@ func _run() -> void:
 func                        _________METHODS_________              ()->void:pass
 
 func run_test() -> void:
+	assert( OS.get_thread_caller_id() == OS.get_main_thread_id(),
+		"A run_test() must not be called in a threaded context.\n" + \
+		"TestBase relies on the 'await' keyword and functionality which is." + \
+		"not usable in a threaded context.\n")
+
 	# Format Dictionary
 	var fd : Dictionary
 	scene_tree = EditorInterface.get_base_control().get_tree()

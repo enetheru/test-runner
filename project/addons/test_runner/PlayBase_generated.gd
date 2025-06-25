@@ -253,4 +253,3 @@ func TEST_OP( val1 : Variant, op : int, val2 : Variant, desc : String = ""  ) ->
 	output.append.call( msg )
 	if _verbose: print_rich( msg )
 	return RetCode.TEST_FAILED
-
